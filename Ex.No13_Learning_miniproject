@@ -1,15 +1,89 @@
 # Ex.No: 10 Learning – Use Supervised Learning  
-### DATE:                                                                            
-### REGISTER NUMBER : 
+### DATE:5-05-2024                                                                           
+### REGISTER NUMBER :212221220024 
 ### AIM: 
-To write a program to train the classifier for -----------------.
+To write a program to train the classifier for Diabetes Prediction..
 ###  Algorithm:
+1.Load data, create user-item matrix, calculate user similarity using cosine similarity.
+2.Predict ratings for target user based on similar user ratings.
+3.Filter out rated books, select top N recommendations with highest predicted ratings.
 
 ### Program:
+~~~
+#import packages
+import numpy as np
+import pandas as pd
 
+from google.colab import drive
+drive.mount('/content/gdrive')
+
+pip install gradio
+
+pip install typing-extensions --upgrade
+
+import gradio as gr
+
+cd /content/gdrive/MyDrive/demo/gradio_project-main
+
+#get the data
+data = pd.read_csv('diabetes.csv')
+data.head()
+
+print(data.columns)
+
+x = data.drop(['Outcome'], axis=1)
+y = data['Outcome']
+print(x[:5])
+
+from multi_imbalance.utils.plot import plot_cardinality_and_2d_data
+plot_cardinality_and_2d_data(x, y, 'PIMA Diabetes Prediction Data set')
+
+#split data
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test= train_test_split(x,y)
+
+#scale data
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+x_train_scaled = scaler.fit_transform(x_train)
+x_test_scaled = scaler.fit_transform(x_test)
+
+#instatiate model
+from sklearn.neural_network import MLPClassifier
+model = MLPClassifier(max_iter=1000, alpha=1)
+model.fit(x_train, y_train)
+print("Model Accuracy on training set:", model.score(x_train, y_train))
+print("Model Accuracy on Test Set:", model.score(x_test, y_test))
+
+print(data.columns)
+
+#create a function for gradio
+def diabetes(Pregnancies, Glucose, Blood_Pressure, SkinThickness, Insulin, BMI,Diabetes_Pedigree, Age):
+    x = np.array([Pregnancies,Glucose,Blood_Pressure,SkinThickness,Insulin,BMI,Diabetes_Pedigree,Age])
+    prediction = model.predict(x.reshape(1, -1))
+    if(prediction==0):
+      return "NO"
+    else:
+      return "YES"
+
+#create a function for gradio
+def diabetes(Pregnancies, Glucose, Blood_Pressure, SkinThickness, Insulin, BMI,Diabetes_Pedigree, Age):
+    x = np.array([Pregnancies,Glucose,Blood_Pressure,SkinThickness,Insulin,BMI,Diabetes_Pedigree,Age])
+    prediction = model.predict(x.reshape(1, -1))
+    return prediction
+
+outputs = gr.outputs.Textbox()
+app = gr.Interface(fn=diabetes, inputs=['number','number','number','number','number','number','number','number'], outputs=outputs,description="Detection of Diabeties")
+app.launch(share=True)
+~~~
 
 ### Output:
 
+https://private-user-images.githubusercontent.com/119394395/280510780-5d1d6c69-8b1d-440f-93a7-87b2b6cd97d0.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTUwODgyOTAsIm5iZiI6MTcxNTA4Nzk5MCwicGF0aCI6Ii8xMTkzOTQzOTUvMjgwNTEwNzgwLTVkMWQ2YzY5LThiMWQtNDQwZi05M2E3LTg3YjJiNmNkOTdkMC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQwNTA3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MDUwN1QxMzE5NTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT00MzBlNzQ5NTI2NTJhMmE5ZTg4ZDAwZDMyNDUzM2M0NTk2ZWNiMmNiODRjZWQwOTg4MThhZDEzYzI2MTc5NWMzJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZhY3Rvcl9pZD0wJmtleV9pZD0wJnJlcG9faWQ9MCJ9.69LeXZoF8FP96swej_GculDA0Sg8zOrkQlZgwYPU9to
+
+https://private-user-images.githubusercontent.com/119394395/280510788-2bcf3f5c-8743-4ed0-bdcc-081cdb9001f7.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTUwODgyOTAsIm5iZiI6MTcxNTA4Nzk5MCwicGF0aCI6Ii8xMTkzOTQzOTUvMjgwNTEwNzg4LTJiY2YzZjVjLTg3NDMtNGVkMC1iZGNjLTA4MWNkYjkwMDFmNy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQwNTA3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MDUwN1QxMzE5NTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT01MzQzODVmYTU1ODdmZmZjNjYyNGNlYjYzZWNhNmI4MTY2ZmZlMjA1M2RjYTExMDFjMjIxZjc4OTUwMTE5ZDljJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZhY3Rvcl9pZD0wJmtleV9pZD0wJnJlcG9faWQ9MCJ9.xTjcJDWZg9-xQw5m-NlmJ23UmCbAPoUccWScMI0GvrU
+
+https://private-user-images.githubusercontent.com/119394395/280510796-7585e686-519e-4ad6-b368-59dc2710a936.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTUwODgyOTAsIm5iZiI6MTcxNTA4Nzk5MCwicGF0aCI6Ii8xMTkzOTQzOTUvMjgwNTEwNzk2LTc1ODVlNjg2LTUxOWUtNGFkNi1iMzY4LTU5ZGMyNzEwYTkzNi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQwNTA3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MDUwN1QxMzE5NTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1jMzRlNDAwYmRjY2M2MmE4Y2M2YmI3OTdlMWZlNDcwOTg2NDk4YzQyMzNkOTVjNzkyMjg1YjFlYWY4NWEyZmFjJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZhY3Rvcl9pZD0wJmtleV9pZD0wJnJlcG9faWQ9MCJ9.3E-Xigv69Lf0JeKpRFeZwDlQ5iYi2wpmxFtpZ2cdleA
 
 ### Result:
 Thus the system was trained successfully and the prediction was carried out.
